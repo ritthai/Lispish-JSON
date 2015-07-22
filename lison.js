@@ -1,5 +1,7 @@
 var evaluate = function (exp, env) {
-    if (undefined === env) { env = {inner: this}; }
+    if (undefined === env) { 
+        env = {inner: this};
+    }
     if (exp.constructor !== Array) {
         return exp;
     }
@@ -32,17 +34,24 @@ var evaluate = function (exp, env) {
         var arg = evaluate(exp[i], env);
         args.push(arg);
     }
+    if (functionToCall === get) {
+        return get(env, args[0]);
+    }
+    if (functionToCall === set) {
+        console.log('set it');
+        return set(env, args[0], args[1]);
+    }
     return functionToCall.apply(this, args);
 };
 
 var env = {};
 
-var get = function (key) {
-    return find(this, key)[key];
+var get = function (env, key) {
+    return find(env, key)[key];
 };
 
-var set = function (key, value) {
-    find(this, key)[key] = value;
+var set = function (env, key, value) {
+    find(env, key)[key] = value;
 };
 
 var lambda = function (vars, exp) {
@@ -61,5 +70,6 @@ var list = function () {
 
 var find = function (env, key) {
     if (env.inner[key]) { return env.inner; }
-    return find(env.outer, key);
+    if (env.outer) { return find(env.outer, key); }
+    return env.inner;
 };
